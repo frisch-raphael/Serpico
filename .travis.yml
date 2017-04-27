@@ -9,6 +9,11 @@ branches:
     - rake_tests
     - dev
 
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libsqlite3-dev libxslt-dev libxml2-dev zlib1g-dev gcc
+
 script:
+  - export RACK_ENV=test
   - ruby scripts/first_time.rb --quiet
-  - RACK_ENV=test rake test
+  - rake test
