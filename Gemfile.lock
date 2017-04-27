@@ -85,6 +85,8 @@ GEM
     rack (1.6.5)
     rack-protection (1.5.3)
       rack
+    rack-test (0.6.3)
+      rack (>= 1.0)
     rake (12.0.0)
     rubyzip (1.2.1)
     sinatra (1.4.7)
@@ -113,6 +115,7 @@ DEPENDENCIES
   msgpack (= 0.6.2)
   net-ldap (~> 0.11)
   nokogiri
+  rack-test
   rake
   rubyzip
   sinatra

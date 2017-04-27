@@ -4,6 +4,7 @@ ruby "2.1.5"
 
 group :test do
   gem 'rake'
+  gem 'rack-test'
   gem 'factory_girl'
 end
 
