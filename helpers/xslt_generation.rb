@@ -1,4 +1,4 @@
-# encoding: ASCII-8BIT
+
 require 'rubygems'
 require './model/master.rb'
 require 'cgi'
@@ -39,17 +39,17 @@ def locate_error(error, document, position)
   while nb_text > 0
     # remove the tags before concatenate text
     message = text_before[-1 * nb_text][5..-7]
-     error.concat("#{message}, ")
-     nb_text -= 1
-   end
+    error.concat("#{message}, ")
+    nb_text -= 1
+  end
   error.concat("\nand \n")
   nb_text = [text_after.count, 10].min
   k = 0
   while nb_text > k
     message = text_after[k][5..-7]
-     error.concat("#{message}, ")
-     k += 1
-   end
+    error.concat("#{message}, ")
+    k += 1
+  end
   error
 end
 
@@ -62,15 +62,15 @@ def verify_document(document)
   tree_valid = true
   while i < metacharacters.length
     case metacharacters[i][1]
-    # ¬ character
+      # ¬ character
     when '¬'
       tabs = "\t" * buffer.length
-    if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != '¬')
-      tree_valid = false
-      error = 'Error with a ¬ character : character without pair'
-      locate_error(error, document, metacharacters[i][0])
-      tree.concat("#{tabs}¬  ←\n")
-      break
+      if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != '¬')
+        tree_valid = false
+        error = 'Error with a ¬ character : character without pair'
+        locate_error(error, document, metacharacters[i][0])
+        tree.concat("#{tabs}¬  ←\n")
+        break
       end
       condition = document[metacharacters[i][0] + 2..metacharacters[i + 1][0] - 1].gsub(/<.*?>/, '')
       if i + 2 < metacharacters.length && metacharacters[i + 2][1] == 'µ'
@@ -81,177 +81,177 @@ def verify_document(document)
       buffer.push('¬')
       i += 1
 
-    # ∆ character
+      # ∆ character
     when '∆'
       previous = buffer.pop
       tabs = "\t" * buffer.length
       if previous != '¬'
         error = if previous == '†'
-                  'error when closing condition, expected ¥, got ∆ instead'
-                elsif previous =~ /¬µ/
+          'error when closing condition, expected ¥, got ∆ instead'
+        elsif previous =~ /¬µ/
           'error when closing choose structure, expected ≠, got ∆ instead'
-                elsif previous =~ /µ/
+        elsif previous =~ /µ/
           'error when closing choose structure, expected å, got ∆ instead'
-                else
+        else
           'error when closing structure, unexpected ∆'
-                end
-      locate_error(error, document, metacharacters[i][0])
-      tree_valid = false
+        end
+        locate_error(error, document, metacharacters[i][0])
+        tree_valid = false
 
-      tree.concat("#{tabs}∆  ←\n")
-      break
+        tree.concat("#{tabs}∆  ←\n")
+        break
       end
       tree.concat("#{tabs}∆\n")
 
-    # † character
+      # † character
     when '†'
       tabs = "\t" * buffer.length
-    if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != '†')
-      tree_valid = false
-      error = 'Error with a † character : character without pair'
-      locate_error(error, document, metacharacters[i][0])
-      tree.concat("#{tabs}†  ←\n")
-      break
+      if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != '†')
+        tree_valid = false
+        error = 'Error with a † character : character without pair'
+        locate_error(error, document, metacharacters[i][0])
+        tree.concat("#{tabs}†  ←\n")
+        break
       end
       condition = document[metacharacters[i][0] + 3..metacharacters[i + 1][0] - 1].gsub(/<.*?>/, '')
       tree.concat("#{tabs}†#{condition}†\n")
       buffer.push('†')
       i += 1
 
-    # ¥ character
+      # ¥ character
     when '¥'
       previous = buffer.pop
       tabs = "\t" * buffer.length
 
       if previous != '†'
         error = if previous == '¬'
-                  'error when closing loop, expected ∆, got ¥ instead'
-                elsif previous =~ /^¬µ/
+          'error when closing loop, expected ∆, got ¥ instead'
+        elsif previous =~ /^¬µ/
           'error when closing choose structure, expected ≠, got ¥ instead'
-                elsif previous =~ /^µ/
+        elsif previous =~ /^µ/
           'error when closing choose structure, expected å, got ¥ instead'
-                else
+        else
           'error when closing structure, unexpected ¥'
-                end
-      # error.concat" at line #{document[0..metacharacters[i][0]].scan(/(?=<w:p( |>))/).count}"
-      locate_error(error, document, metacharacters[i][0])
-      tree_valid = false
+        end
+        # error.concat" at line #{document[0..metacharacters[i][0]].scan(/(?=<w:p( |>))/).count}"
+        locate_error(error, document, metacharacters[i][0])
+        tree_valid = false
 
-      tree.concat("#{tabs}¥  ←\n")
-      break
+        tree.concat("#{tabs}¥  ←\n")
+        break
       end
       tree.concat("#{tabs}¥\n")
 
-    # µ character
+      # µ character
     when 'µ'
       tabs = "\t" * buffer.length
-    if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'µ')
-      error = 'Error with a µ character : character without pair'
-      tree_valid = false
-      locate_error(error, document, metacharacters[i][0])
-      tree.concat("#{tabs}µ  ←\n")
-      break
+      if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'µ')
+        error = 'Error with a µ character : character without pair'
+        tree_valid = false
+        locate_error(error, document, metacharacters[i][0])
+        tree.concat("#{tabs}µ  ←\n")
+        break
       end
       condition = document[metacharacters[i][0] + 2..metacharacters[i + 1][0] - 1].gsub(/<.*?>/, '')
       if buffer[-1] == '¬'
         tree.concat("µ#{condition}µ\n")
-      buffer[-1] = '¬µ'
+        buffer[-1] = '¬µ'
       else
         tree.concat("#{tabs}µ#{condition}µ\n")
-      buffer.push('µ')
+        buffer.push('µ')
       end
       i += 1
 
-    # ƒ character
+      # ƒ character
     when 'ƒ'
       tabs = "\t" * buffer.length
-    if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'ƒ')
-      error = 'Error with a ƒ character : character without pair'
-      tree_valid = false
-      locate_error(error, document, metacharacters[i][0])
-      tree.concat("#{tabs}ƒ  ←\n")
-      break
+      if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'ƒ')
+        error = 'Error with a ƒ character : character without pair'
+        tree_valid = false
+        locate_error(error, document, metacharacters[i][0])
+        tree.concat("#{tabs}ƒ  ←\n")
+        break
       end
       condition = document[metacharacters[i][0] + 2..metacharacters[i + 1][0] - 1].gsub(/<.*?>/, '')
       if buffer[-1] == 'µ' || buffer[-1] == '¬µ'
         tree.concat("#{tabs}ƒ#{condition}ƒ\n")
       elsif buffer[-1] == '¬µ÷' || buffer[-1] == 'µ÷'
         error = 'Error with a ƒ character : character must be before the ÷ character'
-      tree_valid = false
-      tree.concat("#{tabs}ƒ#{condition}ƒ  ←\n")
-      break
+        tree_valid = false
+        tree.concat("#{tabs}ƒ#{condition}ƒ  ←\n")
+        break
       else
         error = 'Error with a ƒ character : character must be inside a choose structure'
-      tree_valid = false
-      tree.concat("#{tabs}ƒ#{condition}ƒ  ←\n")
-      break
+        tree_valid = false
+        tree.concat("#{tabs}ƒ#{condition}ƒ  ←\n")
+        break
       end
       i += 1
 
-    # ÷ character
+      # ÷ character
     when '÷'
       tabs = "\t" * buffer.length
       if buffer[-1] == 'µ' || buffer[-1] == '¬µ'
         tree.concat("#{tabs}÷\n")
-      buffer[-1] = buffer[-1] + '÷'
+        buffer[-1] = buffer[-1] + '÷'
       else
         error = 'Error with a ÷ character : character must be inside a choose structure'
-      tree.concat("#{tabs}÷  ←\n")
-      tree_valid = false
-      locate_error(error, document, metacharacters[i][0])
-      break
+        tree.concat("#{tabs}÷  ←\n")
+        tree_valid = false
+        locate_error(error, document, metacharacters[i][0])
+        break
       end
 
-    # ≠ character
+      # ≠ character
     when '≠'
       previous = buffer.pop
       tabs = "\t" * buffer.length
 
       if previous != '¬µ÷'
         error = if previous == '¬'
-                  'error when closing loop, expected ∆, got ≠ instead'
-                elsif previous =~ /^µ/
+          'error when closing loop, expected ∆, got ≠ instead'
+        elsif previous =~ /^µ/
           'error when closing choose structure, expected å, got ≠ instead'
-                elsif previous == '†'
+        elsif previous == '†'
           'error when closing condition, expected ¥, got ≠ instead'
-                elsif previous == '¬µ'
+        elsif previous == '¬µ'
           'error when closing choose structure, missing ÷ before ≠'
-                else
+        else
           'error when closing structure, unexpected ≠'
-                end
-      tree_valid = false
-      locate_error(error, document, metacharacters[i][0])
+        end
+        tree_valid = false
+        locate_error(error, document, metacharacters[i][0])
 
-      tree.concat("#{tabs}≠  ←\n")
-      break
+        tree.concat("#{tabs}≠  ←\n")
+        break
       end
       tree.concat("#{tabs}≠\n")
 
-    # å character
+      # å character
     when 'å'
       previous = buffer.pop
       tabs = "\t" * buffer.length
 
       if previous != 'µ÷'
         error = if previous == '¬'
-                  'error when closing loop, expected ∆, got å instead'
-                elsif previous =~ /¬µ/
+          'error when closing loop, expected ∆, got å instead'
+        elsif previous =~ /¬µ/
           'error when closing choose structure, expected ≠, got å instead'
-                elsif previous == '†'
+        elsif previous == '†'
           'error when closing condition, expected ¥, got å instead'
-                elsif previous == 'µ'
+        elsif previous == 'µ'
           'error when closing choose structure, missing ÷ before å'
-                else
+        else
           'error when closing structure, unexpected å'
-                end
-      tree_valid = false
-      locate_error(error, document, metacharacters[i][0])
+        end
+        tree_valid = false
+        locate_error(error, document, metacharacters[i][0])
 
-      tree.concat("#{tabs}å  ←\n")
-      break
+        tree.concat("#{tabs}å  ←\n")
+        break
       end
       tree.concat("#{tabs}å\n")
-    # ツ character
+      # ツ character
     when 'ツ'
       # check if there is anything else than π between two ツ
       j = 1
@@ -262,107 +262,107 @@ def verify_document(document)
           tree_valid = false
           break
         end
-             j += 1
+        j += 1
       end
 
       tabs = "\t" * buffer.length
 
       if j + i == metacharacters.length || !tree_valid
         error = 'Error with a ツ character : character without pair'
-      tree_valid = false
-      locate_error(error, document, metacharacters[i][0])
-      tree.concat("#{tabs}ツ  ←\n")
-      break
+        tree_valid = false
+        locate_error(error, document, metacharacters[i][0])
+        tree.concat("#{tabs}ツ  ←\n")
+        break
       end
 
       if j.even?
         error = 'Error with a π character : character without pair'
-      tree_valid = false
-      content = document[metacharacters[i][0] + 3..metacharacters[i + j][0] - 1].gsub(/<.*?>/, '')
-      tree.concat("#{tabs}ツ#{content}ツ  ←\n")
-      break
+        tree_valid = false
+        content = document[metacharacters[i][0] + 3..metacharacters[i + j][0] - 1].gsub(/<.*?>/, '')
+        tree.concat("#{tabs}ツ#{content}ツ  ←\n")
+        break
       end
 
       content = document[metacharacters[i][0] + 3..metacharacters[i + j][0] - 1].gsub(/<.*?>/, '')
       tree.concat("#{tabs}ツ#{content}ツ\n")
       i += j
 
-    # § character
+      # § character
     when '§'
       tabs = "\t" * buffer.length
-    if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != '§')
-      error = 'Error with a § character : character without pair'
-      locate_error(error, document, metacharacters[i][0])
-      tree.concat("#{tabs}§  ←\n")
-      tree_valid = false
-      break
+      if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != '§')
+        error = 'Error with a § character : character without pair'
+        locate_error(error, document, metacharacters[i][0])
+        tree.concat("#{tabs}§  ←\n")
+        tree_valid = false
+        break
       end
       content = document[metacharacters[i][0] + 2..metacharacters[i + 1][0] - 1].gsub(/<.*?>/, '')
       tree.concat("#{tabs}§#{content}§\n")
       i += 1
 
-    # Ω character
+      # Ω character
     when 'Ω'
       tabs = "\t" * buffer.length
-    if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'Ω')
-      error = 'Error with a Ω character : character without pair'
-      tree.concat("#{tabs}Ω  ←\n")
-      tree_valid = false
-      locate_error(error, document, metacharacters[i][0])
-      break
+      if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'Ω')
+        error = 'Error with a Ω character : character without pair'
+        tree.concat("#{tabs}Ω  ←\n")
+        tree_valid = false
+        locate_error(error, document, metacharacters[i][0])
+        break
       end
 
       content = document[metacharacters[i][0] + 2..metacharacters[i + 1][0] - 1].gsub(/<.*?>/, '')
       tree.concat("#{tabs}Ω#{content}Ω\n")
       i += 1
-    # π character
+      # π character
     when 'π'
       tabs = "\t" * buffer.length
-    if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'π')
-      error = 'Error with a π character : character without pair'
-      tree_valid = false
-      tree.concat("#{tabs}π  ←\n")
-      locate_error(error, document, metacharacters[i][0])
-      break
+      if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'π')
+        error = 'Error with a π character : character without pair'
+        tree_valid = false
+        tree.concat("#{tabs}π  ←\n")
+        locate_error(error, document, metacharacters[i][0])
+        break
       end
 
       content = document[metacharacters[i][0] + 2..metacharacters[i + 1][0] - 1].gsub(/<.*?>/, '')
       tree.concat("#{tabs}π#{content}π\n")
       i += 1
 
-    # æ character
+      # æ character
     when 'æ'
       tabs = "\t" * buffer.length
-    if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'æ')
-      error = 'Error with a æ character : character without pair'
-      tree_valid = false
-      tree.concat("#{tabs}æ  ←\n")
-      locate_error(error, document, metacharacters[i][0])
-      break
+      if (i == metacharacters.length - 1) || (metacharacters[i + 1][1] != 'æ')
+        error = 'Error with a æ character : character without pair'
+        tree_valid = false
+        tree.concat("#{tabs}æ  ←\n")
+        locate_error(error, document, metacharacters[i][0])
+        break
       end
 
       condition = document[metacharacters[i][0] + 2..metacharacters[i + 1][0] - 1].gsub(/<.*?>/, '')
 
       if /<w:tbl[ >]((?<!<\/w:tbl>).)*$/.match(document[0..metacharacters[i][0]]).nil?
         error = 'Error with a æ character : character must be inside of table'
-      tree_valid = false
-      tree.concat("#{tabs}æ#{condition}æ  ←\n")
-      locate_error(error, document, metacharacters[i][0])
-      break
+        tree_valid = false
+        tree.concat("#{tabs}æ#{condition}æ  ←\n")
+        locate_error(error, document, metacharacters[i][0])
+        break
       end
       tree.concat("#{tabs}æ#{condition}æ\n")
       buffer.push('æ')
       i += 1
 
-    # ∞ character
+      # ∞ character
     when '∞'
       tabs = "\t" * buffer.length
-    if (i == metacharacters.length - 1) || metacharacters[i + 1][1] != '∞'
-      error = 'Error with a ∞ character : character without pair'
-      tree_valid = false
-      tree.concat("#{tabs}∞  ←\n")
-      locate_error(error, document, metacharacters[i][0])
-      break
+      if (i == metacharacters.length - 1) || metacharacters[i + 1][1] != '∞'
+        error = 'Error with a ∞ character : character without pair'
+        tree_valid = false
+        tree.concat("#{tabs}∞  ←\n")
+        locate_error(error, document, metacharacters[i][0])
+        break
       end
 
       condition = document[metacharacters[i][0] + 3..metacharacters[i + 1][0] - 1].gsub(/<.*?>/, '')
@@ -370,11 +370,9 @@ def verify_document(document)
       tree.concat("#{tabs}∞#{condition}∞\n")
       i += 1
 
-    # end of table
+      # end of table
     when "<\/w:tr>"
-      if buffer[-1] == 'æ'
-        buffer.pop
-      end
+      buffer.pop if buffer[-1] == 'æ'
 
     end
 
@@ -384,16 +382,16 @@ def verify_document(document)
     previous = buffer.pop
     tabs = "\t" * buffer.length
     error = if previous == '†'
-              'error :  condition not closed, expected ¥'
-            elsif previous == /^µ/
-              'error : choose structure nor closed, expected å'
-            elsif previous == /¬µ/
-              'error : choose structure not closed, expected ≠'
-            elsif previous == '¬'
-              'error : loop not closed, expected ∆'
-            else
-              'error : structure not closed'
-            end
+      'error :  condition not closed, expected ¥'
+    elsif previous == /^µ/
+      'error : choose structure nor closed, expected å'
+    elsif previous == /¬µ/
+      'error : choose structure not closed, expected ≠'
+    elsif previous == '¬'
+      'error : loop not closed, expected ∆'
+    else
+      'error : structure not closed'
+    end
     # locate_error(error, document, document[-1])
     tree.concat("#{tabs}←\n")
     tree_valid = false
@@ -431,7 +429,7 @@ def generate_xslt(docx)
   document = document.gsub(/”/, '"')
 
   # add line breaks for easier reading, only use with debugging
-# document = document.gsub('>',">\n")
+  # document = document.gsub('>',">\n")
 
   # replace {} for the sake of XSL
   document = document.gsub('{', '{{').gsub('}', '}}')
@@ -441,16 +439,16 @@ def generate_xslt(docx)
 
   for_iffies = []
 
- ###########################
+  ###########################
 
-# Ω - used as a normal substituion variable
+  # Ω - used as a normal substituion variable
 
   # let's pull out variables
   replace = document.split('Ω')
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of Ω. This is usually caused by a mismatch in a variable.'
-    end
+  end
 
   count = 0
   replace.each do |omega|
@@ -459,22 +457,18 @@ def generate_xslt(docx)
       next
     end
 
-      omega = compress(omega)
+    omega = compress(omega)
 
-      # now, we replace omega with the real deal
-      # <xsl:for-each select="report/reports">
-      # <w:t xml:space="preserve"> <xsl:value-of select="contact_name"/> </w:t>
-      # </xsl:for-each>
-      replace[count] = "<xsl:for-each select=\"report/reports\"><xsl:value-of select=\"#{omega.downcase}\"/></xsl:for-each>"
-      count += 1
+    replace[count] = "<xsl:value-of select=\"/report/reports/#{omega.downcase}\"/>"
+    count += 1
   end
 
   # remove all the Ω and put the document back together
   document = replace.join('')
 
-    ###########################
+  ###########################
 
-# § - used as a user defined variable substituion variable
+  # § - used as a user defined variable substituion variable
 
   # let's pull out variables
   replace = document.split('§')
@@ -488,14 +482,14 @@ def generate_xslt(docx)
     if count.even?
       count += 1
       next
-      end
+    end
 
     omega = compress(omega)
 
-      # now, we replace omega with the real deal
-      # <xsl:for-each select="report/reports">
-      # <w:t xml:space="preserve"> <xsl:value-of select="contact_name"/> </w:t>
-      # </xsl:for-each>
+    # now, we replace omega with the real deal
+    # <xsl:for-each select="report/reports">
+    # <w:t xml:space="preserve"> <xsl:value-of select="contact_name"/> </w:t>
+    # </xsl:for-each>
     replace[count] = "<xsl:for-each select=\"report/udv\"><xsl:value-of select=\"#{omega.downcase}\"/></xsl:for-each>"
     count += 1
   end
@@ -503,7 +497,7 @@ def generate_xslt(docx)
   # remove all the Ω and put the document back together
   document = replace.join('')
 
-###########################
+  ###########################
 
   # π - a replacement variable for for-each loops only
 
@@ -511,7 +505,7 @@ def generate_xslt(docx)
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of π. This is usually caused by a mismatch in a variable.'
-     end
+  end
 
   count = 0
   replace.each do |omega|
@@ -520,23 +514,23 @@ def generate_xslt(docx)
       next
     end
 
-      omega = compress(omega)
+    omega = compress(omega)
 
-      replace[count] = "<xsl:value-of select=\"#{omega.downcase}\"/>"
-      count += 1
+    replace[count] = "<xsl:value-of select=\"#{omega.downcase}\"/>"
+    count += 1
   end
 
   document = replace.join('')
   ###########################
 
-# ∞ - a replacement variable for for-each loops inside tables only
+  # ∞ - a replacement variable for for-each loops inside tables only
 
   # let us replace the xsl when test
   replace = document.split('∞')
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of ∞. This is usually caused by a mismatch in a variable.'
-    end
+  end
 
   count = 0
   replace.each do |omega|
@@ -545,18 +539,18 @@ def generate_xslt(docx)
       next
     end
 
-      omega = compress(omega)
+    omega = compress(omega)
 
-      replace[count] = "<xsl:value-of select=\"#{omega.downcase}\"/>"
+    replace[count] = "<xsl:value-of select=\"#{omega.downcase}\"/>"
 
-      count += 1
+    count += 1
   end
 
   document = replace.join('')
 
- ###############################
+  ###############################
 
-# √ - string comparison
+  # √ - string comparison
 
   # For example, '√ short_company_name:::serpico testing √' is read as "compare short_company_name to 'serpico test' (case_insensitive) and return the result as true or false;  ..."
 
@@ -564,7 +558,7 @@ def generate_xslt(docx)
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of √. This is usually caused by a mismatch in a variable.'
-    end
+  end
 
   count = 0
   replace.each do |omega|
@@ -573,28 +567,28 @@ def generate_xslt(docx)
       next
     end
 
-      omega = compress(omega)
+    omega = compress(omega)
 
-      left = omega.split(':::').first.strip
-      left = if left =~ /:/
-        'report/udv/' + left.delete(':')
-      elsif left =~ /\+/
-        left.delete('+')
-      else
-        'report/reports/' + left
-             end
-      right = omega.split(':::').last.strip
+    left = omega.split(':::').first.strip
+    left = if left =~ /:/
+      'report/udv/' + left.delete(':')
+    elsif left =~ /\+/
+      left.delete('+')
+    else
+      'report/reports/' + left
+    end
+    right = omega.split(':::').last.strip
 
-      replace[count] = "translate(#{left},$up,$low)=translate('#{right}',$up,$low)"
+    replace[count] = "translate(#{left},$up,$low)=translate('#{right}',$up,$low)"
 
-      count += 1
+    count += 1
   end
   document = replace.join('')
 
-###########################
+  ###########################
 
- # æ - for each loop for table rows only
-# ::: - is used for if statements within the row
+  # æ - for each loop for table rows only
+  # ::: - is used for if statements within the row
 
   # For example, 'æ findings:::X > 1 æ' is read as "for each finding with X greater than 1 create a new table row"
 
@@ -602,7 +596,7 @@ def generate_xslt(docx)
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of æ. This is usually caused by a mismatch in a variable.'
-     end
+  end
 
   count = 0
   replace.each do |omega|
@@ -611,61 +605,61 @@ def generate_xslt(docx)
       next
     end
 
-      omega = compress(omega)
+    omega = compress(omega)
 
-      if omega =~ /:::/
-        conditions = omega.split(':::')
-        ifies = conditions.size - 1
-        omega = conditions[0]
+    if omega =~ /:::/
+      conditions = omega.split(':::')
+      ifies = conditions.size - 1
+      omega = conditions[0]
 
-        # skip back to the previous TABLEROW <w:tr
-        if replace[count - 1] =~ /\<w:tr /
-          conditions.shift
-          q = ''
+      # skip back to the previous TABLEROW <w:tr
+      if replace[count - 1] =~ /\<w:tr /
+        conditions.shift
+        q = ''
 
-          conditions.each do |condition|
-            # add uppercase/lowercase to allow users to test for string matches (e.g. type='Database')
-            q << "<xsl:if test=\"#{CGI.escapeHTML(condition.downcase).gsub('&amp;', '&')}\">"
-          end
-          q << '<w:tr '
-          x = replace[count - 1].reverse.sub('<w:tr '.reverse, "<xsl:for-each select=\"#{omega.downcase}\">#{q}".reverse).reverse
-          replace[count - 1] = x
+        conditions.each do |condition|
+          # add uppercase/lowercase to allow users to test for string matches (e.g. type='Database')
+          q << "<xsl:if test=\"#{CGI.escapeHTML(condition.downcase).gsub('&amp;', '&')}\">"
         end
-
-        # skip back to the previous TABLEROW <w:tr
-        if replace[count + 1] =~ /\<\/w:tr/
-          ends = '</xsl:if>' * ifies
-          z = replace[count + 1].sub('</w:tr>', "</w:tr>#{ends}</xsl:for-each>")
-          replace[count + 1] = z
-        end
-
-        replace[count] = ''
-
-      else
-        # skip back to the previous TABLEROW <w:tr
-        if replace[count - 1] =~ /\<w:tr /
-          x = replace[count - 1].reverse.sub('<w:tr '.reverse, "<xsl:for-each select=\"#{omega.downcase}\"><w:tr ".reverse).reverse
-          replace[count - 1] = x
-        end
-
-        replace[count] = ''
-
-        # skip back to the previous TABLEROW <w:tr
-        if replace[count + 1] =~ /\<\/w:tr/
-          z = replace[count + 1].sub('</w:tr>', '</w:tr></xsl:for-each>')
-          replace[count + 1] = z
-        end
+        q << '<w:tr '
+        x = replace[count - 1].reverse.sub('<w:tr '.reverse, "<xsl:for-each select=\"#{omega.downcase}\">#{q}".reverse).reverse
+        replace[count - 1] = x
       end
 
-      count += 1
+      # skip back to the previous TABLEROW <w:tr
+      if replace[count + 1] =~ /\<\/w:tr/
+        ends = '</xsl:if>' * ifies
+        z = replace[count + 1].sub('</w:tr>', "</w:tr>#{ends}</xsl:for-each>")
+        replace[count + 1] = z
+      end
+
+      replace[count] = ''
+
+    else
+      # skip back to the previous TABLEROW <w:tr
+      if replace[count - 1] =~ /\<w:tr /
+        x = replace[count - 1].reverse.sub('<w:tr '.reverse, "<xsl:for-each select=\"#{omega.downcase}\"><w:tr ".reverse).reverse
+        replace[count - 1] = x
+      end
+
+      replace[count] = ''
+
+      # skip back to the previous TABLEROW <w:tr
+      if replace[count + 1] =~ /\<\/w:tr/
+        z = replace[count + 1].sub('</w:tr>', '</w:tr></xsl:for-each>')
+        replace[count + 1] = z
+      end
+    end
+
+    count += 1
   end
 
   document = replace.join('')
 
-###########################
+  ###########################
 
- # ¬ - for each
-# ::: - if statement within the for each
+  # ¬ - for each
+  # ::: - if statement within the for each
 
   # For example, '¬ finding:::DREAD_SCORE > 1 ¬' is read as "for each finding with a DREAD score greater than 1"
 
@@ -673,7 +667,7 @@ def generate_xslt(docx)
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of ¬. This is usually caused by a mismatch in a variable.'
-    end
+  end
 
   count = 0
   replace.each do |omega|
@@ -682,46 +676,46 @@ def generate_xslt(docx)
       next
     end
 
-      omega = compress(omega)
+    omega = compress(omega)
 
-      q = ''
-      if omega =~ /:::/
-        conditions = omega.split(':::')
-        for_iffies.push(conditions.size - 1)
-        omega = conditions[0]
+    q = ''
+    if omega =~ /:::/
+      conditions = omega.split(':::')
+      for_iffies.push(conditions.size - 1)
+      omega = conditions[0]
 
-        conditions.shift
-        conditions.each do |condition|
-          # add uppercase/lowercase to allow users to test for string matches (e.g. type='Database')
-          q << "<xsl:if test=\"#{CGI.escapeHTML(condition.downcase).gsub('&amp;', '&')}\">"
-        end
-      else
-        for_iffies.push(0)
+      conditions.shift
+      conditions.each do |condition|
+        # add uppercase/lowercase to allow users to test for string matches (e.g. type='Database')
+        q << "<xsl:if test=\"#{CGI.escapeHTML(condition.downcase).gsub('&amp;', '&')}\">"
       end
+    else
+      for_iffies.push(0)
+    end
 
-      # we need to search backwards for '<w:p>' or '<w:p ')
-      woutspace = replace[count - 1].rindex('<w:p>')
-      space = replace[count - 1].rindex('<w:p ')
-      woutspace ||= 0
-      space ||= 0
+    # we need to search backwards for '<w:p>' or '<w:p ')
+    woutspace = replace[count - 1].rindex('<w:p>')
+    space = replace[count - 1].rindex('<w:p ')
+    woutspace ||= 0
+    space ||= 0
 
-      if woutspace > space
-        x = replace[count - 1].reverse.sub('<w:p>'.reverse, "<xsl:for-each select=\"#{omega.downcase}\">#{q}<w:p>".reverse).reverse
-        replace[count - 1] = x
-      else
-        x = replace[count - 1].reverse.sub('<w:p '.reverse, "<xsl:for-each select=\"#{omega.downcase}\">#{q}<w:p ".reverse).reverse
-        replace[count - 1] = x
-      end
-      replace[count] = ''
+    if woutspace > space
+      x = replace[count - 1].reverse.sub('<w:p>'.reverse, "<xsl:for-each select=\"#{omega.downcase}\">#{q}<w:p>".reverse).reverse
+      replace[count - 1] = x
+    else
+      x = replace[count - 1].reverse.sub('<w:p '.reverse, "<xsl:for-each select=\"#{omega.downcase}\">#{q}<w:p ".reverse).reverse
+      replace[count - 1] = x
+    end
+    replace[count] = ''
 
-      count += 1
+    count += 1
   end
 
   document = replace.join('')
 
- ###############################
+  ###############################
 
-# † - if variable
+  # † - if variable
 
   # For example, '† DREAD_SCORE > 1 †' is read as "if the DREAD_SCORE is greater than 1 then ..."
 
@@ -729,7 +723,7 @@ def generate_xslt(docx)
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of †. This is usually caused by a mismatch in a variable.'
-    end
+  end
 
   count = 0
   replace.each do |omega|
@@ -738,22 +732,22 @@ def generate_xslt(docx)
       next
     end
 
-      omega = compress(omega)
+    omega = compress(omega)
 
-      x = replace[count - 1].reverse.sub('</w:p>'.reverse, "</w:p><xsl:if test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\">".reverse).reverse
-      replace[count - 1] = x
+    x = replace[count - 1].reverse.sub('</w:p>'.reverse, "</w:p><xsl:if test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\">".reverse).reverse
+    replace[count - 1] = x
 
-      replace[count] = ''
+    replace[count] = ''
 
-      count += 1
+    count += 1
   end
   document = replace.join('')
 
-###########################
+  ###########################
   # ÷ - otherwise . Used in XSLT choose loops
   document = document.gsub('÷', '</w:t></w:r></w:p></xsl:when><xsl:otherwise><w:p><w:r><w:t>')
 
-###########################
+  ###########################
   # ¥ - ends an if statement
 
   q = ''
@@ -767,29 +761,29 @@ def generate_xslt(docx)
       subst = false
     end
 
-      if a =~ /¥/
-        # remove the start of the paragraph
-        alength = a.length
-        woutspace = a.rindex('<w:p>')
-        space = a.rindex('<w:p ')
-        woutspace ||= 0
-        space ||= 0
+    if a =~ /¥/
+      # remove the start of the paragraph
+      alength = a.length
+      woutspace = a.rindex('<w:p>')
+      space = a.rindex('<w:p ')
+      woutspace ||= 0
+      space ||= 0
 
-        if woutspace > space
-          a.slice!(woutspace..alength)
-        else
-          a.slice!(space..alength)
-        end
-        subst = true
+      if woutspace > space
+        a.slice!(woutspace..alength)
+      else
+        a.slice!(space..alength)
       end
+      subst = true
+    end
 
-      q << a.delete('¥')
+    q << a.delete('¥')
   end
   document = q
 
- ###########################
+  ###########################
 
-# ƒ - the when value in a choose statement
+  # ƒ - the when value in a choose statement
 
   # For example, 'ƒcodeƒ OUTPUT' is read as "when the current type is code, write 'OUTPUT'"; see XSLT choose/when/otherwise
 
@@ -797,7 +791,7 @@ def generate_xslt(docx)
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of ƒ. This is usually caused by a mismatch in a variable.'
-    end
+  end
 
   count = 0
   replace.each do |omega|
@@ -806,28 +800,28 @@ def generate_xslt(docx)
       next
     end
 
-      omega = compress(omega)
+    omega = compress(omega)
 
-      # we need to search backwards for '<w:p>' or '<w:p ')
-      woutspace = replace[count - 1].rindex('<w:p>')
-      space = replace[count - 1].rindex('<w:p ')
-      woutspace ||= 0
-      space ||= 0
-      x = ''
-      if woutspace > space
-        x = replace[count - 1].reverse.sub('</w:p>'.reverse, "</w:p></xsl:when><xsl:when test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\">".reverse).reverse
-        replace[count - 1] = x
-      else
-        x = replace[count - 1].reverse.sub('</w:p>'.reverse, "</w:p></xsl:when><xsl:when test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\">".reverse).reverse
-        replace[count - 1] = x
-      end
-      replace[count] = ''
+    # we need to search backwards for '<w:p>' or '<w:p ')
+    woutspace = replace[count - 1].rindex('<w:p>')
+    space = replace[count - 1].rindex('<w:p ')
+    woutspace ||= 0
+    space ||= 0
+    x = ''
+    if woutspace > space
+      x = replace[count - 1].reverse.sub('</w:p>'.reverse, "</w:p></xsl:when><xsl:when test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\">".reverse).reverse
+      replace[count - 1] = x
+    else
+      x = replace[count - 1].reverse.sub('</w:p>'.reverse, "</w:p></xsl:when><xsl:when test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\">".reverse).reverse
+      replace[count - 1] = x
+    end
+    replace[count] = ''
 
-      count += 1
+    count += 1
   end
 
   document = replace.join('')
-###############################
+  ###############################
 
   # µ - initiates choose/when structure
 
@@ -835,7 +829,7 @@ def generate_xslt(docx)
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of µ. This is usually caused by a mismatch in a variable.'
-    end
+  end
 
   count = 0
   replace.each do |omega|
@@ -844,31 +838,31 @@ def generate_xslt(docx)
       next
     end
 
-      omega = compress(omega)
+    omega = compress(omega)
 
-      # we need to search backwards for '<w:p>' or '<w:p ')
-      woutspace = replace[count - 1].rindex('<w:p>')
-      space = replace[count - 1].rindex('<w:p ')
-      woutspace ||= 0
-      space ||= 0
-      x = ''
-      if woutspace > space
-        x = replace[count - 1].reverse.sub('<w:p>'.reverse, "<xsl:choose><xsl:when test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\"><w:p>".reverse).reverse
-        replace[count - 1] = x
-      else
-        x = replace[count - 1].reverse.sub('<w:p '.reverse, "<xsl:choose><xsl:when test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\"><w:p ".reverse).reverse
-        replace[count - 1] = x
-      end
-      replace[count] = ''
+    # we need to search backwards for '<w:p>' or '<w:p ')
+    woutspace = replace[count - 1].rindex('<w:p>')
+    space = replace[count - 1].rindex('<w:p ')
+    woutspace ||= 0
+    space ||= 0
+    x = ''
+    if woutspace > space
+      x = replace[count - 1].reverse.sub('<w:p>'.reverse, "<xsl:choose><xsl:when test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\"><w:p>".reverse).reverse
+      replace[count - 1] = x
+    else
+      x = replace[count - 1].reverse.sub('<w:p '.reverse, "<xsl:choose><xsl:when test=\"#{CGI.escapeHTML(omega.downcase).gsub('&amp;', '&')}\"><w:p ".reverse).reverse
+      replace[count - 1] = x
+    end
+    replace[count] = ''
 
-      count += 1
+    count += 1
   end
 
   document = replace.join('')
 
- ###############################
+  ###############################
 
-###########################
+  ###########################
   # å - the end of choose structure
 
   q = ''
@@ -882,16 +876,16 @@ def generate_xslt(docx)
       subst = false
     end
 
-      subst = true if a =~ /å/
+    subst = true if a =~ /å/
 
-      q << a.delete('å')
+    q << a.delete('å')
   end
   document = q
 
   #######
   # This is ugly but we have to presort the for_iffies and assign them
   #	to the proper loop. This is because there are two types of
-#	closing elements in a for loop, ∆ and ≠. In the case of ≠, you
+  #	closing elements in a for loop, ∆ and ≠. In the case of ≠, you
   #	can't use an if element so we shouldn't close for it.
 
   r_for_iffies = []
@@ -899,22 +893,22 @@ def generate_xslt(docx)
 
   document.split(' ').each do |current|
     next unless current =~ /∆/ || current =~ /≠/
-      if current =~ /∆/
-        # pull out the first count of elements
-        sub_iffies = for_iffies[0..count]
+    if current =~ /∆/
+      # pull out the first count of elements
+      sub_iffies = for_iffies[0..count]
 
-        elem = sub_iffies[0]
-        r_for_iffies.push(elem)
+      elem = sub_iffies[0]
+      r_for_iffies.push(elem)
 
-        0.upto(count) do |_n|
-          for_iffies.shift
-        end
-        count = -1
+      0.upto(count) do |_n|
+        for_iffies.shift
       end
-      count += 1
+      count = -1
+    end
+    count += 1
   end
 
-###########################
+  ###########################
 
   # ≠ - end of choose structure inside of a for-each loop
 
@@ -929,30 +923,30 @@ def generate_xslt(docx)
       subst = false
     end
 
-      subst = true if a =~ /≠/
+    subst = true if a =~ /≠/
 
-      q << a.delete('≠')
+    q << a.delete('≠')
   end
   document = q
 
- ###############################
-# ∆ - end for-each
+  ###############################
+  # ∆ - end for-each
 
   # add end if's
   end_ifs = ''
   r_for_iffies.each do |fi|
     end_ifs = '</xsl:if>' * fi
-      document = document.sub('∆', "</w:t></w:r></w:p>#{end_ifs}</xsl:for-each><w:p><w:r><w:t>")
+    document = document.sub('∆', "</w:t></w:r></w:p>#{end_ifs}</xsl:for-each><w:p><w:r><w:t>")
   end
 
-###############################
+  ###############################
   # ツ - Placeholder for image
 
   replace = document.split('ツ')
 
   if (replace.size - 1).odd?
     raise ReportingError, 'Uneven number of ツ. This is usually caused by a mismatch in a variable.'
-    end
+  end
 
   count = 0
   replace.each do |omega|
@@ -961,12 +955,12 @@ def generate_xslt(docx)
       next
     end
 
-      # Execute when between two ツ
-      omega = compress(omega)
+    # Execute when between two ツ
+    omega = compress(omega)
 
-      replace[count] = "[!!#{omega.downcase}!!]"
+    replace[count] = "[!!#{omega.downcase}!!]"
 
-      count += 1
+    count += 1
   end
 
   # remove all the ツ and put the document back together
@@ -974,9 +968,9 @@ def generate_xslt(docx)
 
   ###########################
 
- # UNUSED
+  # UNUSED
   #	≠
-###############################
+  ###############################
 
   # final changes placed here
   document = white_space(document)
@@ -1006,15 +1000,15 @@ end
 def generate_xslt_components(docx)
   # Initialize the xsl
   @top = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-	<xsl:stylesheet
-	  version="1.0"
-	  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-	  <xsl:output method="xml" indent="yes"/>
-	  <xsl:template match="/">
-	  <xsl:variable name="low" select="\'abcdefghijklmnopqrstuvwxyz\'" /><xsl:variable name="up" select="\'ABCDEFGHIJKLMNOPQRSTUVWXYZ\'" />
-		<xsl:processing-instruction name="mso-application">
-		  <xsl:text>progid="Word.Document"</xsl:text>
-		</xsl:processing-instruction>'
+  <xsl:stylesheet
+  version="1.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output method="xml" indent="yes"/>
+  <xsl:template match="/">
+  <xsl:variable name="low" select="\'abcdefghijklmnopqrstuvwxyz\'" /><xsl:variable name="up" select="\'ABCDEFGHIJKLMNOPQRSTUVWXYZ\'" />
+  <xsl:processing-instruction name="mso-application">
+  <xsl:text>progid="Word.Document"</xsl:text>
+  </xsl:processing-instruction>'
   @bottom = '</xsl:template></xsl:stylesheet>'
   document = ''
   debug = false
@@ -1022,7 +1016,7 @@ def generate_xslt_components(docx)
   list_components_xslt = {}
 
   # add line breaks for easier reading, only use with debugging
-   # document = document.gsub('>',">\n")
+  # document = document.gsub('>',">\n")
 
   components = find_headers_footers(docx)
 
@@ -1101,14 +1095,14 @@ def generate_xslt_components(docx)
 
     # add in xslt footer
     document += @bottom
-  # Trying to catch most xml/xslt/xpathes errors
-  # this if for xml/xslt errors. Trying to transform with empty xml will give errors if xpathes or xslt syntax is wrong
-  begin
-    transformed_document = Nokogiri::XSLT(document).transform(Nokogiri::XML(''))
-  rescue Exception => e
-    error = e.message
-    raise ReportingError, "This exception was rescued while verificating one the XSLT header or footer XSLT well-formedness: <br/><br/>#{CGI.escapeHTML(error)}"
-  end
+    # Trying to catch most xml/xslt/xpathes errors
+    # this if for xml/xslt errors. Trying to transform with empty xml will give errors if xpathes or xslt syntax is wrong
+    begin
+      transformed_document = Nokogiri::XSLT(document).transform(Nokogiri::XML(''))
+    rescue Exception => e
+      error = e.message
+      raise ReportingError, "This exception was rescued while verificating one the XSLT header or footer XSLT well-formedness: <br/><br/>#{CGI.escapeHTML(error)}"
+    end
     list_components_xslt[component] = document
   end
 
@@ -1117,15 +1111,15 @@ end
 
 def compress(omega)
   replacement = ''
-   # if the delimeter is over multiple lines we need to put it together
+  # if the delimeter is over multiple lines we need to put it together
   if omega =~ /\<\/w\:t\>/
     splitter = omega.gsub('>', ">\n")
     splitter = splitter.gsub('<', "\n<")
     splitter.split("\n").each do |multiline|
       next unless multiline !~ /\>/
-       next if multiline == ''
-       # we only want the text, forget anything else
-       replacement << multiline
+      next if multiline == ''
+      # we only want the text, forget anything else
+      replacement << multiline
     end
   else
     return omega
