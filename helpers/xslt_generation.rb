@@ -465,7 +465,7 @@ def generate_xslt(docx)
       # <xsl:for-each select="report/reports">
       # <w:t xml:space="preserve"> <xsl:value-of select="contact_name"/> </w:t>
       # </xsl:for-each>
-      replace[count] = "<xsl:for-each select=\"report/reports\"><xsl:value-of select=\"#{omega.downcase}\"/></xsl:for-each>"
+      replace[count] = "<xsl:value-of select=\"/report/reports/#{omega.downcase}\"/>"
       count += 1
   end
 
